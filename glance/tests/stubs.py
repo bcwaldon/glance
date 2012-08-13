@@ -75,6 +75,14 @@ def stub_out_registry_and_store_server(stubs, base_dir):
                 return res.body
 
             setattr(res, 'read', fake_reader)
+
+            def fake_getheader(header_name):
+                    return 'fake-header-value'
+
+            if hasattr(res, 'getheader'):
+                return res.getheader(header_name)
+            else:
+                setattr(res, 'getheader', fake_getheader)
             return res
 
     class FakeSocket(object):
@@ -153,6 +161,14 @@ def stub_out_registry_and_store_server(stubs, base_dir):
                 return res.body
 
             setattr(res, 'read', fake_reader)
+
+            def fake_getheader(header_name):
+                    return 'fake-header-value'
+
+            if hasattr(res, 'getheader'):
+                return res.getheader(header_name)
+            else:
+                setattr(res, 'getheader', fake_getheader)
             return res
 
     def fake_get_connection_type(client):
@@ -228,6 +244,14 @@ def stub_out_registry_server(stubs, **kwargs):
                 return res.body
 
             setattr(res, 'read', fake_reader)
+
+            def fake_getheader(header_name):
+                    return 'fake-header-value'
+
+            if hasattr(res, 'getheader'):
+                return res.getheader(header_name)
+            else:
+                setattr(res, 'getheader', fake_getheader)
             return res
 
     def fake_get_connection_type(client):
