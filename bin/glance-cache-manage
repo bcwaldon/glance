@@ -357,7 +357,7 @@ def create_options(parser):
                       dest='os_tenant_name',
                       default=env('OS_TENANT_NAME'),
                       help='Defaults to env[OS_TENANT_NAME]')
-    parser.add_option('T', '--os_tenant_name',
+    parser.add_option('-T', '--os_tenant_name',
                       dest='os_tenant_name',
                       help=optparse.SUPPRESS_HELP)
 
