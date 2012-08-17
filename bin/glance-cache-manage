@@ -271,6 +271,19 @@ def get_client(options):
                 insecure=options.insecure)
 
 
+def env(*vars, **kwargs):
+    """Search for the first defined of possibly many env vars
+
+    Returns the first environment variable defined in vars, or
+    returns the default defined in kwargs.
+    """
+    for v in vars:
+        value = os.environ.get(v, None)
+        if value:
+            return value
+    return kwargs.get('default', '')
+
+
 def create_options(parser):
     """
     Sets up the CLI and config-file options that may be
@@ -302,7 +315,7 @@ def create_options(parser):
 
     parser.add_option('--os-auth-token',
                       dest = 'os_auth_token',
-                      default=utils.env('OS_AUTH_TOKEN'),
+                      default=env('OS_AUTH_TOKEN'),
                       help='Defaults to env[OS_AUTH_TOKEN]')
     parser.add_option('-A', '--os_auth_token', '--auth_token',
                       dest = 'os_auth_token',
@@ -310,7 +323,7 @@ def create_options(parser):
 
     parser.add_option('--os-username',
                       dest = 'os_username',
-                      default=utils.env('OS_USERNAME'),
+                      default=env('OS_USERNAME'),
                       help='Defaults to env[OS_USERNAME]')
     parser.add_option('-I', '--os_username',
                       dest='os_username',
@@ -318,7 +331,7 @@ def create_options(parser):
 
     parser.add_option('--os-password',
                       dest='os_password',
-                      default=utils.env('OS_PASSWORD'),
+                      default=env('OS_PASSWORD'),
                       help='Defaults to env[OS_PASSWORD]')
     parser.add_option('-K', '--os_password',
                       dest='os_password',
@@ -326,7 +339,7 @@ def create_options(parser):
 
     parser.add_option('--os-region-name',
                       dest='os_region_name',
-                      default=utils.env('OS_REGION_NAME'),
+                      default=env('OS_REGION_NAME'),
                       help='Defaults to env[OS_REGION_NAME]')
     parser.add_option('-R', '--os_region_name',
                       dest='os_region_name',
@@ -334,7 +347,7 @@ def create_options(parser):
 
     parser.add_option('--os-tenant-id',
                       dest='os_tenant_id',
-                      default=utils.env('OS_TENANT_ID'),
+                      default=env('OS_TENANT_ID'),
                       help='Defaults to env[OS_TENANT_ID]')
     parser.add_option('--os_tenant_id',
                       dest='os_tenant_id',
@@ -342,14 +355,14 @@ def create_options(parser):
 
     parser.add_option('--os-tenant-name',
                       dest='os_tenant_name',
-                      default=utils.env('OS_TENANT_NAME'),
+                      default=env('OS_TENANT_NAME'),
                       help='Defaults to env[OS_TENANT_NAME]')
     parser.add_option('T', '--os_tenant_name',
                       dest='os_tenant_name',
                       help=optparse.SUPPRESS_HELP)
 
     parser.add_option('--os-auth-url',
-                      default=utils.env('OS_AUTH_URL'),
+                      default=env('OS_AUTH_URL'),
                       help='Defaults to env[OS_AUTH_URL]')
     parser.add_option('-N', '--os_auth_url',
                       dest='os_auth_url',
