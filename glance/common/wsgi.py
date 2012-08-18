@@ -165,7 +165,8 @@ class Server(object):
         """
         Run a WSGI server with the given application.
 
-        :param application: The application to run in the WSGI server
+        :param application: A function that can be called with no arguments
+                that will return the application to run in the WSGI server
         :param default_port: Port to bind to if none is specified in conf
         """
         def kill_children(*args):
@@ -184,7 +185,7 @@ class Server(object):
             signal.signal(signal.SIGHUP, signal.SIG_IGN)
             self.running = False
 
-        self.application = application
+        self.app_func = application
         self.sock = get_socket(default_port)
 
         os.umask(027)  # ensure files are created with the correct privileges
@@ -266,7 +267,7 @@ class Server(object):
         eventlet.patcher.monkey_patch(all=False, socket=True)
         self.pool = eventlet.GreenPool(size=self.threads)
         try:
-            eventlet.wsgi.server(self.sock, self.application,
+            eventlet.wsgi.server(self.sock, self.app_func(),
                     log=WritableLogger(self.logger), custom_pool=self.pool)
         except socket.error, err:
             if err[0] != errno.EINVAL:
