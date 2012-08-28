@@ -122,8 +122,9 @@ def configure_db():
         if CONF.db_auto_create:
             LOG.info('auto-creating glance registry DB')
             models.register_models(_ENGINE)
+            latest_version = migration.get_latest_version()
             try:
-                migration.version_control()
+                migration.version_control(latest_version)
             except exception.DatabaseMigrationError:
                 # only arises when the DB exists and is under version control
                 pass

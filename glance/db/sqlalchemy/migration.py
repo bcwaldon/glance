@@ -101,8 +101,6 @@ def _version_control(version):
     """
     repo_path = get_migrate_repo_path()
     sql_connection = CONF.sql_connection
-    if version is None:
-        version = versioning_repository.Repository(repo_path).latest
     return versioning_api.version_control(sql_connection, repo_path, version)
 
 
@@ -130,3 +128,8 @@ def get_migrate_repo_path():
                         'migrate_repo')
     assert os.path.exists(path)
     return path
+
+
+def get_latest_version():
+    repo_path = get_migrate_repo_path()
+    return versioning_repository.Repository(repo_path).latest
