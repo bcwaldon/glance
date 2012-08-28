@@ -84,7 +84,7 @@ def do_db_sync(args):
     # override auto-create flag, as complete DB should always
     # be created on sync if not already existing
     CONF.register_opts(glance.db.sqlalchemy.api.db_opts)
-    CONF.set_override('db_auto_create', True)
+    CONF.set_override('db_auto_create', False)
     glance.db.sqlalchemy.api.configure_db()
     version = args.pop(0) if args else None
     current_version = args.pop(0) if args else None
