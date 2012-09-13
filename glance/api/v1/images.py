@@ -990,8 +990,12 @@ class ImageSerializer(wsgi.JSONResponseSerializer):
         image_iter = result['image_iterator']
         # image_meta['size'] should be an int, but could possibly be a str
         expected_size = int(image_meta['size'])
+
+        notify_cb = common.get_image_send_notify_cb(response.request.context,
+                image_meta, expected_size, self.notifier, response.remote_addr)
         response.app_iter = common.size_checked_iter(
-                response, image_meta, expected_size, image_iter, self.notifier)
+                image_id, expected_size, image_iter, notify_cb)
+
         # Using app_iter blanks content-length, so we set it here...
         response.headers['Content-Length'] = str(image_meta['size'])
         response.headers['Content-Type'] = 'application/octet-stream'

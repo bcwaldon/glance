@@ -138,8 +138,11 @@ class ResponseSerializer(wsgi.JSONResponseSerializer):
         response.headers['Content-Type'] = 'application/octet-stream'
         if checksum:
             response.headers['Content-MD5'] = checksum
+
+        notify_cb = common.get_image_send_notify_cb(response.request.context,
+                result['meta'], size, self.notifier, response.remote_addr)
         response.app_iter = common.size_checked_iter(
-                response, result['meta'], size, result['data'], self.notifier)
+                result['meta']['id'], size, result['data'], notify_cb)
 
     def upload(self, response, result):
         response.status_int = 201

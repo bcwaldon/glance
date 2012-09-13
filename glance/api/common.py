@@ -13,37 +13,25 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import errno
-
 from glance.common import exception
 from glance.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 
 
-def size_checked_iter(response, image_meta, expected_size, image_iter,
-        notifier):
-    image_id = image_meta['id']
+def size_checked_iter(image_id, expected_size, image_iter, notify_cb):
     bytes_written = 0
-
-    def notify_image_sent_hook(env):
-        image_send_notification(bytes_written, expected_size,
-                image_meta, response.request, notifier)
-
-    # Add hook to process after response is fully sent
-    if 'eventlet.posthooks' in response.request.environ:
-        response.request.environ['eventlet.posthooks'].append(
-            (notify_image_sent_hook, (), {}))
-
     try:
         for chunk in image_iter:
             yield chunk
             bytes_written += len(chunk)
-    except Exception, err:
+    except Exception:
         msg = _("An error occurred reading from backend storage "
-                "for image %(image_id)s: %(err)s") % locals()
-        LOG.error(msg)
+                "for image %(image_id)s") % locals()
+        LOG.exception(msg)
         raise
+
+    notify_cb(bytes_written)
 
     if expected_size != bytes_written:
         msg = _("Backend storage for image %(image_id)s "
@@ -54,18 +42,17 @@ def size_checked_iter(response, image_meta, expected_size, image_iter,
                                           "image %(image_id)s") % locals())
 
 
-def image_send_notification(bytes_written, expected_size, image_meta, request,
-        notifier):
+def image_send_notification(notifier, context, bytes_written, expected_size,
+        image_meta, remote_address):
     """Send an image.send message to the notifier."""
     try:
-        context = request.context
         payload = {
             'bytes_sent': bytes_written,
             'image_id': image_meta['id'],
             'owner_id': image_meta['owner'],
             'receiver_tenant_id': context.tenant,
             'receiver_user_id': context.user,
-            'destination_ip': request.remote_addr,
+            'destination_ip': remote_address,
         }
         if bytes_written != expected_size:
             notify = notifier.error
@@ -74,7 +61,18 @@ def image_send_notification(bytes_written, expected_size, image_meta, request,
 
         notify('image.send', payload)
 
-    except Exception, err:
-        msg = _("An error occurred during image.send"
-                " notification: %(err)s") % locals()
-        LOG.error(msg)
+    except Exception:
+        msg = _("An error occurred during image.send notification")
+        LOG.exception(msg)
+        raise
+
+
+def get_image_send_notify_cb(context, image_meta, expected_size, notifier,
+        remote_address):
+    def notify(bytes_written):
+        image_send_notification(notifier, context, bytes_written,
+                expected_size, image_meta, remote_address)
+    return notify
+
+
+
