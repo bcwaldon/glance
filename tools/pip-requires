@@ -22,6 +22,9 @@ iso8601>=0.1.4
 # For Swift storage backend.
 python-swiftclient>=1.2,<2
 
+# For Cinder storage backend.
+python-cinderclient # latest is required
+
 # Note you will need gcc buildtools installed and must
 # have installed libxml headers for lxml to be successfully
 # installed using pip, therefore you will need to install the
